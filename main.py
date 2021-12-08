@@ -3,6 +3,7 @@ import pandas as pandas
 import pandas as pd
 from datetime import datetime   #시간 읽기 편할도록
 from pprint import pprint   #프린트 이쁘게
+import time
 
 
 
@@ -115,3 +116,62 @@ open_orders = binance.fetch_open_orders(
 )
 pprint(open_orders)
 '''
+
+'''
+# 초당 한번씩 비트코인 가격이랑 시간 나오게하기
+symbol = "BTC/USDT"
+while True:
+    btc = binance.fetch_ticker(symbol)
+    now = datetime.now()
+    print(now.strftime('%H:%M:%S'),btc['last'])
+    time.sleep(1)
+'''
+
+symbol = "BTC/USDT"
+btc = binance.fetch_ohlcv(
+    symbol = symbol,
+    timeframe = '1d',
+    since=None,
+    limit=10
+)
+
+df = pd.DataFrame(
+    data = btc,
+    columns=['datetime','open','high','low','close','volume']
+)
+df['datetime'] = pd.to_datetime(df['datetime'], unit='ms')
+df.set_index('datetime',inplace=True)
+
+yesterday = df.iloc[-2]
+today = df.iloc[-1]
+target = today['open'] + (yesterday['high'] - yesterday['low']) * 0.5
+print(target)
+print(df)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
