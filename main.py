@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import datetime   #시간 읽기 편할도록
 from pprint import pprint   #프린트 이쁘게
 import time
+import move_target
 
 
 
@@ -128,32 +129,18 @@ while True:
 '''
 
 symbol = "BTC/USDT"
-btc = binance.fetch_ohlcv(
-    symbol = symbol,
-    timeframe = '1d',
-    since=None,
-    limit=10
-)
 
-df = pd.DataFrame(
-    data = btc,
-    columns=['datetime','open','high','low','close','volume']
-)
-df['datetime'] = pd.to_datetime(df['datetime'], unit='ms')
-df.set_index('datetime',inplace=True)
+target = move_target.cal_target(binance, symbol)
 
-yesterday = df.iloc[-2]
-today = df.iloc[-1]
-target = today['open'] + (yesterday['high'] - yesterday['low']) * 0.5
-print(target)
-print(df)
+while True:
+    now = datetime.now()
 
+    if now.hour == 9 and now.minute==0 and (20 <= now.second < 30):
+        target = move_target.cal_target(binance, symbol)
 
-
-
-
-
-
+    btc = binance.fetch_ticker(symbol)
+    print(now.strftime('%H:%M:%S'), btc['last'])
+    time.sleep(1)
 
 
 
